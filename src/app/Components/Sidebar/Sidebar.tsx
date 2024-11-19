@@ -43,7 +43,7 @@ const Sidebar = () => {
 
       {/* Sidebar */}
       <div
-        className={`bg-primary text-white p-4 fixed top-0 left-0 h-screen 
+        className={`bg-forte text-white p-4 fixed top-0 left-0 h-screen 
           transition-transform duration-300 transform ${
             isOpen ? "translate-x-0" : "-translate-x-full"
           }
@@ -51,7 +51,7 @@ const Sidebar = () => {
       >
         {/* Logo */}
         <div className="flex items-center justify-center mb-4 mt-2">
-          <img src="/logoescura.png" alt="Logo" className="w-64 h-20" />
+          <img src="/logo.png" alt="Logo" className="w-64 h-20" />
         </div>
 
         {/* Links da sidebar */}

@@ -1,4 +1,4 @@
-import "../../app/globals.css"; // Certifique-se de que o caminho está correto
+import "../styles/globals.css"; // Certifique-se de que o caminho está correto
 
 export const metadata = {
   title: "Login",

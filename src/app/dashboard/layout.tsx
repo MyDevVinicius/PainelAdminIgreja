@@ -1,4 +1,5 @@
 "use client";
+import "../styles/globals.css"; 
 
 import React from "react";
 import Sidebar from "../Components/Sidebar/Sidebar";

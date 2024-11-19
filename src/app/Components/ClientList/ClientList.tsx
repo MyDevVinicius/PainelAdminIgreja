@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
+import { FaEdit, FaTrash, FaKey } from "react-icons/fa"; // Ícones de edição, exclusão e chave
 import "react-toastify/dist/ReactToastify.css";
 
 interface Cliente {
@@ -21,31 +22,26 @@ const ListaClientes = () => {
   const [editandoCliente, setEditandoCliente] = useState<Cliente | null>(null);
 
   // Função para gerar código aleatório
-  const gerarCodigoAleatorio = () => {
-    const caracteres =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const gerarCodigoAleatorio = (): string => {
+    const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let codigo = "";
     for (let i = 0; i < 15; i++) {
-      codigo += caracteres.charAt(
-        Math.floor(Math.random() * caracteres.length)
-      );
+      codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
     }
     return codigo;
   };
 
   // Função para gerar código de verificação
-  const gerarCodigoVerificacao = () => {
-    const caracteres =
-      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  const gerarCodigoVerificacao = (): string => {
+    const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let codigo = "";
     for (let i = 0; i < 10; i++) {
-      codigo += caracteres.charAt(
-        Math.floor(Math.random() * caracteres.length)
-      );
+      codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
     }
     return codigo;
   };
 
+  // Carregar clientes do backend
   useEffect(() => {
     const fetchClientes = async () => {
       try {
@@ -60,10 +56,12 @@ const ListaClientes = () => {
     fetchClientes();
   }, []);
 
+  // Manipulador de edição de cliente
   const handleEditar = (cliente: Cliente) => {
     setEditandoCliente(cliente);
   };
 
+  // Salvar edição de cliente
   const handleSalvarEdicao = async () => {
     if (editandoCliente) {
       try {
@@ -72,26 +70,40 @@ const ListaClientes = () => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(editandoCliente),
+          body: JSON.stringify({
+            nome_responsavel: editandoCliente.nome_responsavel,
+            nome_igreja: editandoCliente.nome_igreja,
+            email: editandoCliente.email,
+            cnpj_cpf: editandoCliente.cnpj_cpf,
+            endereco: editandoCliente.endereco,
+            chave_acesso: editandoCliente.chave_acesso, // Chave de acesso no corpo da requisição
+          }),
         });
 
         if (res.ok) {
-          toast.success("Cliente atualizado com sucesso!");
+          const updatedCliente = await res.json(); // Obtém os dados atualizados do cliente
+          toast.success("Cliente e chave de acesso atualizados com sucesso!");
+
+          // Atualiza a lista de clientes localmente
           setClientes((prevClientes) =>
             prevClientes.map((cliente) =>
-              cliente.id === editandoCliente.id ? editandoCliente : cliente
+              cliente.id === editandoCliente.id ? updatedCliente : cliente
             )
           );
+
+          // Reseta o cliente em edição
           setEditandoCliente(null);
         } else {
           toast.error("Erro ao atualizar cliente.");
         }
       } catch (error) {
+        console.error("Erro ao salvar a edição:", error);
         toast.error("Erro ao salvar a edição.");
       }
     }
   };
 
+  // Deletar cliente
   const handleDeletar = async (clienteId: string) => {
     try {
       const res = await fetch(`/api/deleteCliente/${clienteId}`, {
@@ -111,9 +123,19 @@ const ListaClientes = () => {
     }
   };
 
-  // Função para fechar o modal
+  // Fechar modal de edição
   const handleFecharModal = () => {
     setEditandoCliente(null);
+  };
+
+  // Gerar chave de acesso ao clicar no botão
+  const handleGerarChaveAcesso = () => {
+    if (editandoCliente) {
+      const chaveAcesso = gerarCodigoAleatorio();
+      setEditandoCliente((prev) =>
+        prev ? { ...prev, chave_acesso: chaveAcesso } : prev
+      );
+    }
   };
 
   return (
@@ -143,203 +165,131 @@ const ListaClientes = () => {
           </tr>
         </thead>
         <tbody>
-          {clientes.map((cliente) => (
-            <tr key={cliente.id} className="hover:bg-gray-50">
-              <td className="border-b px-4 py-2">{cliente.nome_responsavel}</td>
-              <td className="border-b px-4 py-2">{cliente.nome_igreja}</td>
-              <td className="border-b px-4 py-2">{cliente.email}</td>
-              <td className="border-b px-4 py-2">{cliente.cnpj_cpf}</td>
-              <td className="border-b px-4 py-2">{cliente.nome_banco}</td>
-              <td className="border-b px-4 py-2">{cliente.status}</td>
-              <td className="border-b px-4 py-2">
-                <button
-                  className="bg-blue-600 text-white px-4 py-2 rounded mr-2"
-                  onClick={() => handleEditar(cliente)}
-                >
-                  Editar
-                </button>
-                <button
-                  className="bg-red-600 text-white px-4 py-2 rounded"
-                  onClick={() => handleDeletar(cliente.id)}
-                >
-                  Deletar
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
+  {clientes && clientes.length > 0 ? (
+    clientes.map((cliente) => (
+      cliente.id ? (
+        <tr key={cliente.id} className="hover:bg-gray-50">
+          <td className="border-b px-4 py-2">{cliente.nome_responsavel}</td>
+          <td className="border-b px-4 py-2">{cliente.nome_igreja}</td>
+          <td className="border-b px-4 py-2">{cliente.email}</td>
+          <td className="border-b px-4 py-2">{cliente.cnpj_cpf}</td>
+          <td className="border-b px-4 py-2">{cliente.nome_banco}</td>
+          <td className="border-b px-4 py-2">{cliente.status}</td>
+          <td className="border-b px-4 py-2 flex gap-2">
+            <FaEdit
+              className="text-blue-600 cursor-pointer"
+              size={20}
+              title="Editar"
+              onClick={() => handleEditar(cliente)}
+            />
+            <FaTrash
+              className="text-red-600 cursor-pointer"
+              size={20}
+              title="Deletar"
+              onClick={() => handleDeletar(cliente.id)}
+            />
+          </td>
+        </tr>
+      ) : null
+    ))
+  ) : (
+    <tr><td colSpan={7}>Nenhum cliente encontrado</td></tr>
+  )}
+</tbody>
+
       </table>
 
       {editandoCliente && (
-        <div className="p-4 bg-gray-100 rounded-lg">
-          <h3 className="text-xl font-bold mb-4">Editar Cliente</h3>
-          <div className="flex justify-end mb-4">
-            <button
-              className="bg-gray-500 text-white px-4 py-2 rounded mr-2"
-              onClick={handleFecharModal}
-            >
-              Fechar
-            </button>
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-              onClick={handleSalvarEdicao}
-            >
-              Salvar
-            </button>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Nome Responsável
-              </label>
-              <input
-                type="text"
-                value={editandoCliente.nome_responsavel}
-                onChange={(e) =>
-                  setEditandoCliente({
-                    ...editandoCliente,
-                    nome_responsavel: e.target.value,
-                  })
-                }
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Nome Igreja
-              </label>
-              <input
-                type="text"
-                value={editandoCliente.nome_igreja}
-                onChange={(e) =>
-                  setEditandoCliente({
-                    ...editandoCliente,
-                    nome_igreja: e.target.value,
-                  })
-                }
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Email</label>
-              <input
-                type="email"
-                value={editandoCliente.email}
-                onChange={(e) =>
-                  setEditandoCliente({
-                    ...editandoCliente,
-                    email: e.target.value,
-                  })
-                }
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">CNPJ/CPF</label>
-              <input
-                type="text"
-                value={editandoCliente.cnpj_cpf}
-                onChange={(e) =>
-                  setEditandoCliente({
-                    ...editandoCliente,
-                    cnpj_cpf: e.target.value,
-                  })
-                }
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Banco</label>
-              <input
-                type="text"
-                value={editandoCliente.nome_banco}
-                onChange={(e) =>
-                  setEditandoCliente({
-                    ...editandoCliente,
-                    nome_banco: e.target.value,
-                  })
-                }
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Status</label>
-              <select
-                value={editandoCliente.status}
-                onChange={(e) =>
-                  setEditandoCliente({
-                    ...editandoCliente,
-                    status: e.target.value as "ativo" | "inativo",
-                  })
-                }
-                className="w-full p-2 border rounded"
-              >
-                <option value="ativo">Ativo</option>
-                <option value="inativo">Inativo</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Chave de Acesso
-              </label>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={editandoCliente.chave_acesso}
-                  readOnly
-                  className="w-full p-2 border rounded"
-                />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-3/4 max-w-lg">
+            <h3 className="text-xl font-bold mb-4">Editar Cliente</h3>
+            <form>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <label htmlFor="nome_responsavel" className="text-sm font-medium mb-1">Nome do Responsável</label>
+                  <input
+                    id="nome_responsavel"
+                    type="text"
+                    value={editandoCliente.nome_responsavel}
+                    onChange={(e) => setEditandoCliente({ ...editandoCliente, nome_responsavel: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="nome_igreja" className="text-sm font-medium mb-1">Nome da Igreja</label>
+                  <input
+                    id="nome_igreja"
+                    type="text"
+                    value={editandoCliente.nome_igreja}
+                    onChange={(e) => setEditandoCliente({ ...editandoCliente, nome_igreja: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="email" className="text-sm font-medium mb-1">Email</label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={editandoCliente.email}
+                    onChange={(e) => setEditandoCliente({ ...editandoCliente, email: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="cnpj_cpf" className="text-sm font-medium mb-1">CNPJ/CPF</label>
+                  <input
+                    id="cnpj_cpf"
+                    type="text"
+                    value={editandoCliente.cnpj_cpf}
+                    onChange={(e) => setEditandoCliente({ ...editandoCliente, cnpj_cpf: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="endereco" className="text-sm font-medium mb-1">Endereço</label>
+                  <input
+                    id="endereco"
+                    type="text"
+                    value={editandoCliente.endereco || ""}
+                    onChange={(e) => setEditandoCliente({ ...editandoCliente, endereco: e.target.value })}
+                    className="px-3 py-2 border rounded-md"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label htmlFor="chave_acesso" className="text-sm font-medium mb-1">Chave de Acesso</label>
+                  <input
+                    id="chave_acesso"
+                    type="text"
+                    value={editandoCliente.chave_acesso}
+                    disabled
+                    className="px-3 py-2 border rounded-md bg-gray-200"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleGerarChaveAcesso}
+                    className="text-white bg-blue-500 mt-2 px-4 py-2 rounded-md"
+                  >
+                    Gerar nova chave de acesso
+                  </button>
+                </div>
+              </div>
+              <div className="mt-4 flex justify-between">
                 <button
-                  onClick={() =>
-                    setEditandoCliente({
-                      ...editandoCliente,
-                      chave_acesso: gerarCodigoAleatorio(),
-                    })
-                  }
-                  className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
+                  type="button"
+                  onClick={handleFecharModal}
+                  className="text-red-600"
                 >
-                  Gerar
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSalvarEdicao}
+                  className="text-white bg-green-600 px-4 py-2 rounded-md"
+                >
+                  Salvar Edição
                 </button>
               </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">
-                Código de Verificação
-              </label>
-              <div className="flex">
-                <input
-                  type="text"
-                  value={editandoCliente.codigo_verificacao}
-                  readOnly
-                  className="w-full p-2 border rounded"
-                />
-                <button
-                  onClick={() =>
-                    setEditandoCliente({
-                      ...editandoCliente,
-                      codigo_verificacao: gerarCodigoVerificacao(),
-                    })
-                  }
-                  className="ml-2 bg-blue-500 text-white px-4 py-2 rounded"
-                >
-                  Gerar
-                </button>
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-2">Endereço</label>
-              <input
-                type="text"
-                value={editandoCliente.endereco || ""}
-                onChange={(e) =>
-                  setEditandoCliente({
-                    ...editandoCliente,
-                    endereco: e.target.value,
-                  })
-                }
-                className="w-full p-2 border rounded"
-              />
-            </div>
+            </form>
           </div>
         </div>
       )}

@@ -1,5 +1,7 @@
 "use client";
 import { useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Função para gerar código aleatório de 15 caracteres
 const gerarCodigoAleatorio = () => {
@@ -48,23 +50,66 @@ const CadastroCliente = () => {
       codigo_verificacao: codigoVerificacao,
     };
 
-    const res = await fetch("/api/clientes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(cliente),
-    });
+    try {
+      const res = await fetch("/api/clientes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(cliente),
+      });
 
-    if (res.ok) {
-      alert("Cliente cadastrado com sucesso!");
-    } else {
-      alert("Erro ao cadastrar cliente!");
+      if (res.ok) {
+        toast.success("Cliente cadastrado com sucesso!", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+        // Resetando os campos
+        setNomeResponsavel("");
+        setNomeIgreja("");
+        setEmail("");
+        setCnpjCpf("");
+        setEndereco("");
+        setNomeBanco("");
+        setChaveAcesso("");
+        setStatus("ativo");
+        setCodigoVerificacao("");
+      } else {
+        const error = await res.json();
+        toast.error(`Erro: ${error.message || "Não foi possível cadastrar."}`, {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "colored",
+        });
+      }
+    } catch (error) {
+      toast.error("Erro ao cadastrar cliente. Tente novamente.", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "colored",
+      });
     }
   };
 
   return (
     <div className="p-6 bg-white shadow-md rounded-lg">
+      <ToastContainer />
       <h2 className="text-2xl font-bold mb-6">Cadastro de Cliente</h2>
       <form
         onSubmit={handleSubmit}
@@ -146,7 +191,7 @@ const CadastroCliente = () => {
         {/* Coluna 3 */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">
-            Chave de Acesso
+            Senha Temporária
           </label>
           <div className="flex items-center">
             <input
