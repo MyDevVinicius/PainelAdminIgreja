@@ -85,11 +85,11 @@ const Sidebar = () => {
           </li>
           <li>
             <Link
-              href="/membros"
+              href="/clientes"
               className="flex items-center text-lg hover:text-white py-3 px-4 rounded-lg transition transform duration-300 hover:shadow-lg hover:scale-105"
             >
               <FaUsers className="mr-2" />
-              Membros
+              Clientes
             </Link>
           </li>
           <li>
@@ -105,11 +105,7 @@ const Sidebar = () => {
 
         {/* Rodapé */}
         <div className="space-y-4 mt-auto">
-          <button className="flex items-center w-full text-lg bg-yellow-500 text-white hover:bg-yellow-600 py-3 px-4 rounded-lg transition transform duration-300 hover:shadow-lg hover:scale-105">
-            <FaHeadset className="mr-2" />
-            Suporte
-          </button>
-
+         
           <button
             onClick={handleLogout}
             className="flex items-center w-full text-lg bg-red-500 text-white hover:bg-red-600 py-3 px-4 rounded-lg mt-4 transition transform duration-300 hover:shadow-lg hover:scale-105"

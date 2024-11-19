@@ -110,14 +110,14 @@ const CadastroCliente = () => {
   return (
     <div className="p-6 bg-white shadow-md rounded-lg">
       <ToastContainer />
-      <h2 className="text-2xl font-bold mb-6">Cadastro de Cliente</h2>
+      <h2 className="text-2xl font-bold mb-6 text-media">Cadastro de Cliente</h2>
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
       >
         {/* Coluna 1 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">
+          <label className="block text-sm font-medium text-media mb-2">
             Nome do Responsável
           </label>
           <input
@@ -130,7 +130,7 @@ const CadastroCliente = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">
+          <label className="block text-sm font-medium  text-media mb-2">
             Nome da Igreja
           </label>
           <input
@@ -143,7 +143,7 @@ const CadastroCliente = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Email</label>
+          <label className="block text-sm font-medium text-media mb-2">Email</label>
           <input
             type="email"
             value={email}
@@ -155,7 +155,7 @@ const CadastroCliente = () => {
 
         {/* Coluna 2 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">CNPJ/CPF</label>
+          <label className="block text-sm font-medium text-media mb-2">CNPJ/CPF</label>
           <input
             type="text"
             value={cnpjCpf}
@@ -166,7 +166,7 @@ const CadastroCliente = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Endereço</label>
+          <label className="block text-sm font-medium text-media mb-2">Endereço</label>
           <input
             type="text"
             value={endereco}
@@ -176,7 +176,7 @@ const CadastroCliente = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">
+          <label className="block text-sm font-medium text-media mb-2">
             Nome do Banco
           </label>
           <input
@@ -190,7 +190,7 @@ const CadastroCliente = () => {
 
         {/* Coluna 3 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">
+          <label className="block text-sm font-medium  text-media mb-2">
             Senha Temporária
           </label>
           <div className="flex items-center">
@@ -204,7 +204,7 @@ const CadastroCliente = () => {
             <button
               type="button"
               onClick={gerarChaveAcesso}
-              className="ml-2 bg-blue-600 text-white p-2 rounded"
+              className="ml-2 bg-media  text-white p-2 rounded"
             >
               Gerar
             </button>
@@ -212,19 +212,19 @@ const CadastroCliente = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">Status</label>
+          <label className="block text-sm font-medium text-media mb-2">Status</label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as "ativo" | "inativo")}
             className="w-full p-2 border rounded"
           >
-            <option value="ativo">Ativo</option>
+            <option  value="ativo">Ativo</option>
             <option value="inativo">Inativo</option>
           </select>
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium mb-2">
+          <label className="block text-sm font-medium  text-media mb-2">
             Código de Verificação
           </label>
           <div className="flex items-center">
@@ -238,7 +238,7 @@ const CadastroCliente = () => {
             <button
               type="button"
               onClick={gerarCodigoVerificacao}
-              className="ml-2 bg-blue-600 text-white p-2 rounded"
+              className="ml-2 bg-media text-white p-2 rounded"
             >
               Gerar
             </button>
@@ -247,7 +247,7 @@ const CadastroCliente = () => {
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded mt-4 col-span-3"
+          className="w-full bg-media text-white p-2 rounded mt-4 col-span-3"
         >
           Cadastrar Cliente
         </button>
