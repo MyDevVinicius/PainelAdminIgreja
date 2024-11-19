@@ -1,64 +1,101 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [senha, setSenha] = useState('');
-  const [message, setMessage] = useState('');
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const res = await fetch('/api/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    // Verifica se os campos estão vazios
+    if (!email || !senha) {
+      toast.error("Por favor, preencha todos os campos.");
+      return;
+    }
+
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, senha }),
     });
 
     const data = await res.json();
-    setMessage(data.message);
 
     if (res.ok) {
-      // Redireciona para o dashboard após login bem-sucedido
-      router.push('/clientes');
+      toast.success("Login realizado com sucesso!");
+      setTimeout(() => router.push("/dashboard"), 2000);
+    } else {
+      toast.error(data.message || "Erro ao fazer login!");
     }
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold mb-4">Login</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="bg-white rounded-lg shadow-lg flex flex-col items-center w-full max-w-sm md:max-w-md lg:max-w-lg p-6">
+        {/* Logo */}
+        <div className="mb-6">
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="w-[400px] h-[120px]" // Define a largura e altura manualmente
           />
         </div>
-        <div className="mb-4">
-          <label className="block text-sm font-medium mb-1">Senha</label>
-          <input
-            type="password"
-            value={senha}
-            onChange={(e) => setSenha(e.target.value)}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600"
-        >
-          Entrar
-        </button>
-      </form>
-      {message && <p className="mt-4 text-center text-red-500">{message}</p>}
+        <h1 className="text-2xl font-bold mb-6 text-center text-media">
+          Painel de Controle
+        </h1>
+        <form onSubmit={handleSubmit} className="w-full">
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2 text-textlogo">
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full  p-3 border border-media rounded-lg focus:outline-none focus:ring-2 focus:ring-textlogo"
+              placeholder="Digite seu email"
+              required
+            />
+          </div>
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2 text-textlogo">
+              Senha
+            </label>
+            <input
+              type="password"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className="w-full p-3 border border-media rounded-lg focus:outline-none focus:ring-2 focus:ring-textlogo"
+              placeholder="Digite sua senha"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-forte text-white py-3 rounded-lg hover:bg-media focus:outline-none focus:ring-4 focus:ring-media"
+          >
+            Entrar
+          </button>
+        </form>
+      </div>
+      {/* Contêiner de notificações */}
+      <ToastContainer
+        position="top-center"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
     </div>
   );
 }

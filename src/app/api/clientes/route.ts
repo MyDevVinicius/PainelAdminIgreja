@@ -1,26 +1,41 @@
-import { NextRequest, NextResponse } from 'next/server';
-import pool from '@/lib/mysql';
-import crypto from 'crypto';
+import { NextRequest, NextResponse } from "next/server";
+import pool from "@/lib/mysql";
+import crypto from "crypto";
 
 export async function POST(req: NextRequest) {
-  const { nome_responsavel, nome_igreja, email, cnpj_cpf, endereco } = await req.json();
+  const { nome_responsavel, nome_igreja, email, cnpj_cpf, endereco } =
+    await req.json();
 
   if (!nome_responsavel || !nome_igreja || !email || !cnpj_cpf || !endereco) {
-    return NextResponse.json({ message: 'Todos os campos são obrigatórios!' }, { status: 400 });
+    return NextResponse.json(
+      { message: "Todos os campos são obrigatórios!" },
+      { status: 400 }
+    );
   }
 
   try {
     const conn = await pool.getConnection();
-    
+
     // Gerar um código de verificação único de 15 dígitos
-    const codigoAcesso = crypto.randomBytes(8).toString('hex').slice(0, 15); // Gera um código de 15 caracteres
+    const codigoAcesso = crypto.randomBytes(8).toString("hex").slice(0, 15); // Gera um código de 15 caracteres
 
     // Gerar o nome do banco com base no nome da igreja
-    const nome_banco = nome_igreja.replace(/\s+/g, '_').toLowerCase(); // Remover espaços e colocar em minúsculas
+    const nome_banco = nome_igreja.replace(/\s+/g, "_").toLowerCase(); // Remover espaços e colocar em minúsculas
 
     // Inserir o cliente na tabela principal com o código de verificação, nome do banco e outros dados
-    const query = 'INSERT INTO clientes (nome_responsavel, nome_igreja, email, cnpj_cpf, endereco, nome_banco, chave_acesso, status, codigo_verificacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)';
-    const values = [nome_responsavel, nome_igreja, email, cnpj_cpf, endereco, nome_banco, codigoAcesso, 'ativo', codigoAcesso];
+    const query =
+      "INSERT INTO clientes (nome_responsavel, nome_igreja, email, cnpj_cpf, endereco, nome_banco, chave_acesso, status, codigo_verificacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const values = [
+      nome_responsavel,
+      nome_igreja,
+      email,
+      cnpj_cpf,
+      endereco,
+      nome_banco,
+      codigoAcesso,
+      "ativo",
+      codigoAcesso,
+    ];
     await conn.query(query, values);
 
     // Criar banco de dados para o cliente com o nome gerado
@@ -74,17 +89,27 @@ export async function POST(req: NextRequest) {
       INSERT INTO ${nome_banco}.usuarios (nome, email, senha, cargo) 
       VALUES (?, ?, ?, ?)
     `;
-    const userValues = [nome_responsavel, email, codigoAcesso, 'conselho_fiscal'];
+    const userValues = [
+      nome_responsavel,
+      email,
+      codigoAcesso,
+      "conselho_fiscal",
+    ];
     await conn.query(insertUserQuery, userValues);
 
     // Retornar sucesso e código de acesso
-    return NextResponse.json({
-      message: 'Cliente cadastrado e banco de dados criado com sucesso!',
-      chaveAcesso: codigoAcesso, // Retorna a chave de acesso
-    }, { status: 200 });
-
+    return NextResponse.json(
+      {
+        message: "Cliente cadastrado e banco de dados criado com sucesso!",
+        chaveAcesso: codigoAcesso, // Retorna a chave de acesso
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error(error);
-    return NextResponse.json({ message: 'Erro ao cadastrar cliente!' }, { status: 500 });
+    return NextResponse.json(
+      { message: "Erro ao cadastrar cliente!" },
+      { status: 500 }
+    );
   }
 }

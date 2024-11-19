@@ -5,12 +5,15 @@ export default {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/globals.css", // Inclua o arquivo de estilos globais
   ],
   theme: {
     extend: {
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        forte: "#0b3e4d", // Cor forte
+        textlogo: "#239d8d", // Cor para texto logo
+        media: "#1c6b6e", // Cor para media
+        fraca: "#43cfb6", // Cor fraca
       },
     },
   },
