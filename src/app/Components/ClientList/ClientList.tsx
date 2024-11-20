@@ -256,12 +256,16 @@ const ListaClientes = () => {
       )}
       {/* Modal de edição */}
       {editandoCliente && (
-        <div className="modal">
-          <div className="modal-content">
-            <h2>Editar Cliente</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="modal fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50">
+          <div className="modal-content bg-white p-8 rounded-lg shadow-lg w-full max-w-4xl">
+            <h2 className="text-2xl font-semibold text-center text-media mb-6">
+              Modo Edição de Cliente
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="form-group">
-                <label>Nome Responsável:</label>
+                <label className="block text-gray-700 font-medium text-media mb-2">
+                  Nome Responsável:
+                </label>
                 <input
                   type="text"
                   value={editandoCliente.nome_responsavel}
@@ -271,10 +275,14 @@ const ListaClientes = () => {
                       nome_responsavel: e.target.value,
                     })
                   }
+                  className="w-full p-3 border border-fraca rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Nome do responsável"
                 />
               </div>
               <div className="form-group">
-                <label>Nome Igreja:</label>
+                <label className="block text-gray-700 font-medium text-media mb-2">
+                  Nome Igreja:
+                </label>
                 <input
                   type="text"
                   value={editandoCliente.nome_igreja}
@@ -284,10 +292,14 @@ const ListaClientes = () => {
                       nome_igreja: e.target.value,
                     })
                   }
+                  className="w-full p-3 border border-fraca rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Nome da igreja"
                 />
               </div>
               <div className="form-group">
-                <label>Email:</label>
+                <label className="block text-gray-700 font-medium  text-media mb-2">
+                  Email:
+                </label>
                 <input
                   type="email"
                   value={editandoCliente.email}
@@ -297,10 +309,14 @@ const ListaClientes = () => {
                       email: e.target.value,
                     })
                   }
+                  className="w-full p-3 border border-fraca rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Email"
                 />
               </div>
               <div className="form-group">
-                <label>CNPJ/CPF:</label>
+                <label className="block text-gray-700 font-medium text-media mb-2">
+                  CNPJ/CPF:
+                </label>
                 <input
                   type="text"
                   value={editandoCliente.cnpj_cpf}
@@ -310,10 +326,14 @@ const ListaClientes = () => {
                       cnpj_cpf: e.target.value,
                     })
                   }
+                  className="w-full p-3 border border-fraca rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="CNPJ ou CPF"
                 />
               </div>
               <div className="form-group">
-                <label>Endereço:</label>
+                <label className="block text-gray-700 font-medium text-media mb-2">
+                  Endereço:
+                </label>
                 <input
                   type="text"
                   value={editandoCliente.endereco}
@@ -323,10 +343,14 @@ const ListaClientes = () => {
                       endereco: e.target.value,
                     })
                   }
+                  className="w-full p-3 border border-fraca rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Endereço"
                 />
               </div>
               <div className="form-group">
-                <label>Senha:</label>
+                <label className="block text-gray-700 font-medium text-media mb-2">
+                  Senha:
+                </label>
                 <input
                   type="text"
                   value={editandoCliente.senha || ""}
@@ -336,10 +360,14 @@ const ListaClientes = () => {
                       senha: e.target.value,
                     })
                   }
+                  className="w-full p-3 border border-fraca rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Senha"
                 />
               </div>
               <div className="form-group">
-                <label>Chave de Verificação:</label>
+                <label className="block text-gray-700 font-medium text-media mb-2">
+                  Chave de Verificação:
+                </label>
                 <input
                   type="text"
                   value={editandoCliente.codigo_verificacao || ""}
@@ -349,23 +377,25 @@ const ListaClientes = () => {
                       codigo_verificacao: e.target.value,
                     })
                   }
+                  className="w-full p-3 border border-fraca rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Código de verificação"
                 />
               </div>
             </div>
-          </div>
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={handleSalvarEdicao}
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-            >
-              Salvar
-            </button>
-            <button
-              onClick={handleFecharModal}
-              className="bg-gray-300 text-gray-700 px-4 py-2 rounded"
-            >
-              Cancelar
-            </button>
+            <div className="mt-6 flex gap-4 justify-center">
+              <button
+                onClick={handleSalvarEdicao}
+                className="bg-media text-white px-6 py-2 rounded-md hover:bg-fraca focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Salvar
+              </button>
+              <button
+                onClick={handleFecharModal}
+                className="bg-red-800 text-white px-6 py-2 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </div>
       )}
