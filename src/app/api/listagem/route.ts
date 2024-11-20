@@ -1,10 +1,25 @@
 import { NextResponse } from "next/server";
 import pool from "../../../lib/mysql";
 
+interface Cliente {
+  id: number;
+  nome_responsavel: string;
+  nome_igreja: string;
+  email: string;
+  cnpj_cpf: string;
+  endereco: string;
+  nome_banco: string;
+  chave_acesso: string;
+  status: string;
+  criado_em: string;
+  senha?: string | null;
+  codigo_verificacao?: string | null;
+}
+
 export async function GET() {
   try {
     // Consulta principal para obter a lista de clientes
-    const [clientes] = (await pool.execute(`
+    const [clientes]: [Cliente[], any] = await pool.execute(`
       SELECT 
         id, 
         nome_responsavel, 
@@ -17,23 +32,23 @@ export async function GET() {
         status, 
         criado_em 
       FROM clientes
-    `)) as Cliente[];
+    `);
 
     // Para cada cliente, buscar a senha no banco correspondente
-    const clientesCompletos = await Promise.all(
+    const clientesCompletos: Cliente[] = await Promise.all(
       clientes.map(async (cliente) => {
         if (!cliente.nome_banco) return cliente; // Caso não haja banco associado, retorna o cliente como está.
 
         try {
           // Buscar a senha no banco do cliente
-          const [usuario] = (await pool.query(
+          const [usuario]: [{ senha: string }[], any] = await pool.query(
             `
             SELECT senha 
             FROM ${pool.escapeId(cliente.nome_banco)}.usuarios 
             WHERE email = ?
           `,
             [cliente.email]
-          )) as { senha: string }[];
+          );
 
           if (usuario && usuario.length > 0) {
             cliente.senha = usuario[0].senha; // Adiciona a senha ao objeto cliente
@@ -42,14 +57,15 @@ export async function GET() {
           }
 
           // Buscar o código de verificação no banco admin_db (não criptografado)
-          const [codigoVerificacao] = (await pool.query(
-            `
+          const [codigoVerificacao]: [{ codigo_verificacao: string }[], any] =
+            await pool.query(
+              `
             SELECT codigo_verificacao 
             FROM admin_db.clientes 
             WHERE email = ?
           `,
-            [cliente.email]
-          )) as [{ codigo_verificacao: string }];
+              [cliente.email]
+            );
 
           if (codigoVerificacao && codigoVerificacao.length > 0) {
             cliente.codigo_verificacao =

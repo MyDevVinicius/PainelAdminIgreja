@@ -83,6 +83,9 @@ export async function POST(req: NextRequest) {
     const createEntryTableQuery = `
       CREATE TABLE IF NOT EXISTS ${nome_banco}.entrada (
         id INT AUTO_INCREMENT PRIMARY KEY,
+        observacao VARCHAR(255) ,
+        tipo ENUM('Dizimo','Oferta','Doacao','Campanha') NOT NULL,
+        forma_pagamento ENUM('Dinheiro','PIX','Debito','Credito'),
         valor DECIMAL(10, 2) NOT NULL,
         data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -92,6 +95,9 @@ export async function POST(req: NextRequest) {
     const createExitTableQuery = `
       CREATE TABLE IF NOT EXISTS ${nome_banco}.saida (
         id INT AUTO_INCREMENT PRIMARY KEY,
+        observacao VARCHAR(255) ,
+        tipo ENUM('Pagamento','Salario','Ajuda de Custo') NOT NULL,
+        forma_pagamento ENUM('Dinheiro','PIX','Debito','Credito'),
         valor DECIMAL(10, 2) NOT NULL,
         data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
@@ -103,10 +109,22 @@ export async function POST(req: NextRequest) {
         id INT AUTO_INCREMENT PRIMARY KEY,
         nome VARCHAR(255) NOT NULL,
         data_nascimento DATE,
-        endereco VARCHAR(255)
+        endereco VARCHAR(255),
+        status ENUM('ativo','inativo')
       );
     `;
     await conn.query(createMembersTableQuery);
+
+    const createContasTableQuery = `
+      CREATE TABLE IF NOT EXISTS ${nome_banco}.contas_a_pagar (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        observacao VARCHAR(255) NOT NULL,
+        valor DECIMAL(10,2) NOT NULL,
+        status ENUM('Pago','Pendente','Pago Parcial','Vencida'),
+        data_vencimento DATE
+      );
+    `;
+    await conn.query(createContasTableQuery);
 
     // Inserir o usuário com cargo 'conselho_fiscal' e senha sendo o código de acesso criptografado
     const insertUserQuery = `
