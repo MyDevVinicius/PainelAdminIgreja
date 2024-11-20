@@ -22,7 +22,9 @@ const CadastroCliente = () => {
   const [endereco, setEndereco] = useState("");
   const [nomeBanco, setNomeBanco] = useState("");
   const [chaveAcesso, setChaveAcesso] = useState("");
-  const [status, setStatus] = useState<"ativo" | "inativo">("ativo");
+  const [status, setStatus] = useState<"ativo" | "inativo" | "pendente">(
+    "pendente"
+  );
   const [codigoVerificacao, setCodigoVerificacao] = useState("");
 
   // Função para gerar e definir o código aleatório para chave de acesso
@@ -30,9 +32,16 @@ const CadastroCliente = () => {
     setChaveAcesso(gerarCodigoAleatorio());
   };
 
-  // Função para gerar e definir o código aleatório para o código de verificação
+  // Função para gerar código de verificação com letras maiúsculas e números
   const gerarCodigoVerificacao = () => {
-    setCodigoVerificacao(gerarCodigoAleatorio());
+    const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // Apenas maiúsculas e números
+    let codigo = "";
+    for (let i = 0; i < 15; i++) {
+      codigo += caracteres.charAt(
+        Math.floor(Math.random() * caracteres.length)
+      );
+    }
+    setCodigoVerificacao(codigo);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -110,7 +119,9 @@ const CadastroCliente = () => {
   return (
     <div className="p-6 bg-white shadow-md rounded-lg">
       <ToastContainer />
-      <h2 className="text-2xl font-bold mb-6 text-media">Cadastro de Cliente</h2>
+      <h2 className="text-2xl font-bold mb-6 text-media">
+        Cadastro de Cliente
+      </h2>
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-3 gap-4"
@@ -143,7 +154,9 @@ const CadastroCliente = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-media mb-2">Email</label>
+          <label className="block text-sm font-medium text-media mb-2">
+            Email
+          </label>
           <input
             type="email"
             value={email}
@@ -155,7 +168,9 @@ const CadastroCliente = () => {
 
         {/* Coluna 2 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium text-media mb-2">CNPJ/CPF</label>
+          <label className="block text-sm font-medium text-media mb-2">
+            CNPJ/CPF
+          </label>
           <input
             type="text"
             value={cnpjCpf}
@@ -166,7 +181,9 @@ const CadastroCliente = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-media mb-2">Endereço</label>
+          <label className="block text-sm font-medium text-media mb-2">
+            Endereço
+          </label>
           <input
             type="text"
             value={endereco}
@@ -212,13 +229,15 @@ const CadastroCliente = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-media mb-2">Status</label>
+          <label className="block text-sm font-medium text-media mb-2">
+            Status
+          </label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value as "ativo" | "inativo")}
             className="w-full p-2 border rounded"
           >
-            <option  value="ativo">Ativo</option>
+            <option value="ativo">Ativo</option>
             <option value="inativo">Inativo</option>
           </select>
         </div>

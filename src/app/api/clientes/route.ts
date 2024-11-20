@@ -1,11 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import pool from "@/lib/mysql";
-import crypto from "crypto";
+import bcrypt from "bcryptjs"; // Importação do bcrypt para criptografar a chave de acesso
+
+// Função para validar o nome do banco (evitar caracteres especiais ou inválidos)
+const sanitizeDatabaseName = (name: string) => {
+  return name.replace(/[^a-zA-Z0-9_]/g, ""); // Permite apenas letras, números e underscores
+};
+
+// Função para gerar código aleatório de 15 caracteres (sem criptografia)
+const gerarCodigoVerificacao = () => {
+  const caracteres = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"; // Apenas maiúsculas e números
+  let codigo = "";
+  for (let i = 0; i < 15; i++) {
+    codigo += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+  }
+  return codigo;
+};
 
 export async function POST(req: NextRequest) {
   const { nome_responsavel, nome_igreja, email, cnpj_cpf, endereco } =
     await req.json();
 
+  // Validação para garantir que todos os campos obrigatórios sejam preenchidos
   if (!nome_responsavel || !nome_igreja || !email || !cnpj_cpf || !endereco) {
     return NextResponse.json(
       { message: "Todos os campos são obrigatórios!" },
@@ -13,18 +29,26 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Sanitizar o nome da igreja para o nome do banco
+  const nome_banco = sanitizeDatabaseName(
+    nome_igreja.replace(/\s+/g, "_").toLowerCase()
+  );
+
   try {
     const conn = await pool.getConnection();
 
-    // Gerar um código de verificação único de 15 dígitos
-    const codigoAcesso = crypto.randomBytes(8).toString("hex").slice(0, 15); // Gera um código de 15 caracteres
+    // Gerar um código de verificação único de 15 caracteres aleatórios (sem criptografia)
+    const codigoAcesso = gerarCodigoVerificacao();
+    const codigoVerificacao = gerarCodigoVerificacao(); // Código de verificação simples, sem criptografia
 
-    // Gerar o nome do banco com base no nome da igreja
-    const nome_banco = nome_igreja.replace(/\s+/g, "_").toLowerCase(); // Remover espaços e colocar em minúsculas
+    // Criptografar a chave de acesso
+    const chaveAcessoCriptografada = await bcrypt.hash(codigoAcesso, 10); // Usando bcrypt para criptografar a chave de acesso
 
     // Inserir o cliente na tabela principal com o código de verificação, nome do banco e outros dados
-    const query =
-      "INSERT INTO clientes (nome_responsavel, nome_igreja, email, cnpj_cpf, endereco, nome_banco, chave_acesso, status, codigo_verificacao) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    const query = `
+      INSERT INTO clientes (nome_responsavel, nome_igreja, email, cnpj_cpf, endereco, nome_banco, chave_acesso, status, codigo_verificacao) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
     const values = [
       nome_responsavel,
       nome_igreja,
@@ -32,9 +56,9 @@ export async function POST(req: NextRequest) {
       cnpj_cpf,
       endereco,
       nome_banco,
-      codigoAcesso,
-      "ativo",
-      codigoAcesso,
+      chaveAcessoCriptografada, // Chave de acesso criptografada
+      "pendente", // O cliente começa com status "pendente"
+      codigoVerificacao, // Código de verificação simples (não criptografado)
     ];
     await conn.query(query, values);
 
@@ -55,7 +79,7 @@ export async function POST(req: NextRequest) {
     `;
     await conn.query(createTableQuery);
 
-    // Criar outras tabelas necessárias (entrada, saída, membros, etc.)
+    // Criar outras tabelas necessárias
     const createEntryTableQuery = `
       CREATE TABLE IF NOT EXISTS ${nome_banco}.entrada (
         id INT AUTO_INCREMENT PRIMARY KEY,
@@ -84,7 +108,7 @@ export async function POST(req: NextRequest) {
     `;
     await conn.query(createMembersTableQuery);
 
-    // Inserir o usuário com cargo 'conselho_fiscal' e senha sendo o código de acesso
+    // Inserir o usuário com cargo 'conselho_fiscal' e senha sendo o código de acesso criptografado
     const insertUserQuery = `
       INSERT INTO ${nome_banco}.usuarios (nome, email, senha, cargo) 
       VALUES (?, ?, ?, ?)
@@ -92,16 +116,16 @@ export async function POST(req: NextRequest) {
     const userValues = [
       nome_responsavel,
       email,
-      codigoAcesso,
+      chaveAcessoCriptografada, // Usar a chave de acesso criptografada como senha
       "conselho_fiscal",
     ];
     await conn.query(insertUserQuery, userValues);
 
-    // Retornar sucesso e código de acesso
+    // Retornar sucesso com a chave de acesso gerada
     return NextResponse.json(
       {
         message: "Cliente cadastrado e banco de dados criado com sucesso!",
-        chaveAcesso: codigoAcesso, // Retorna a chave de acesso
+        chaveAcesso: codigoAcesso, // Retorna a chave de acesso gerada (não criptografada)
       },
       { status: 200 }
     );

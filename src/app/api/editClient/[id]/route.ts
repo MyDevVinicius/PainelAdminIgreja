@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import pool from "@/lib/mysql"; // Caminho para a configuração do pool de conexão
+import pool from "@/lib/mysql"; // Configuração do pool de conexão
 import crypto from "crypto";
+import bcrypt from "bcryptjs"; // Para hashear a senha
 
-// Função para tratar requisições PUT para atualizar dados do cliente
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    // Aguardar o acesso ao parâmetro id
-    const { id } = params; // Não é necessário usar await aqui, pois 'params' já está disponível na rota
+    const { id } = params;
 
     if (!id) {
       return NextResponse.json(
@@ -15,7 +17,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       );
     }
 
-    // Extrai os dados do corpo da requisição
     const body = await req.json();
     const {
       nome_responsavel,
@@ -24,6 +25,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       cnpj_cpf,
       endereco,
       chave_acesso,
+      senha, // Nova senha enviada para o cliente
+      status, // Status tratado separadamente
     }: {
       nome_responsavel?: string;
       nome_igreja?: string;
@@ -31,15 +34,18 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       cnpj_cpf?: string;
       endereco?: string;
       chave_acesso?: string;
+      senha?: string; // Novo campo para senha
+      status?: "ativo" | "inativo";
     } = body;
 
-    // Verifica se pelo menos um campo foi enviado para atualização
     if (
       !nome_responsavel &&
       !nome_igreja &&
       !email &&
       !cnpj_cpf &&
-      !endereco
+      !endereco &&
+      !status &&
+      !senha
     ) {
       return NextResponse.json(
         { message: "Pelo menos um campo deve ser enviado para atualização!" },
@@ -51,7 +57,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     try {
       // Verifica se o cliente existe e obtém o nome do banco de dados
-      const getClienteQuery = "SELECT nome_banco FROM clientes WHERE id = ?";
+      const getClienteQuery =
+        "SELECT nome_banco, status FROM clientes WHERE id = ?";
       const [clientes]: any[] = await conn.query(getClienteQuery, [id]);
 
       if (!clientes || clientes.length === 0) {
@@ -62,6 +69,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       }
 
       const nome_banco = clientes[0].nome_banco;
+      const clienteStatus = clientes[0].status; // Status atual do cliente
 
       if (!nome_banco) {
         return NextResponse.json(
@@ -97,24 +105,34 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
       await conn.query(updateClienteQuery, updateClienteValues);
 
+      // Se o status foi enviado, atualiza também o status
+      if (status && status !== clienteStatus) {
+        const updateStatusQuery = `
+          UPDATE clientes 
+          SET status = ? 
+          WHERE id = ?`;
+        await conn.query(updateStatusQuery, [status, id]);
+      }
+
       // Atualiza os dados do usuário no banco de dados do cliente
+      const hashedPassword = senha ? await bcrypt.hash(senha, 10) : null; // Hash da nova senha, se enviada
+
       const updateUserQuery = `
         UPDATE ${conn.escapeId(nome_banco)}.usuarios 
         SET 
           nome = COALESCE(?, nome),
           email = COALESCE(?, email),
-          senha = COALESCE(?, senha)
+          senha = COALESCE(?, senha) 
         WHERE email = ?`;
       const updateUserValues = [
         nome_responsavel,
         email,
-        novaChaveAcesso, // Atualiza a senha para a nova chave de acesso
+        hashedPassword, // Atualiza a senha com o hash gerado, se fornecida
         email,
       ];
 
       await conn.query(updateUserQuery, updateUserValues);
 
-      // Retorna uma mensagem de sucesso e a nova chave de acesso gerada
       return NextResponse.json(
         {
           message: "Cliente e usuário atualizados com sucesso!",

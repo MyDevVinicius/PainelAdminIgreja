@@ -58,7 +58,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full  p-3 border border-media rounded-lg focus:outline-none focus:ring-2 focus:ring-textlogo"
+              className="w-full p-3 border border-media rounded-lg focus:outline-none focus:ring-2 focus:ring-textlogo"
               placeholder="Digite seu email"
               required
             />
@@ -86,15 +86,16 @@ export default function LoginPage() {
       </div>
       {/* Contêiner de notificações */}
       <ToastContainer
-        position="top-center"
+        position="top-right" // Define o posicionamento no canto superior direito
         autoClose={3000}
         hideProgressBar={false}
-        newestOnTop={false}
+        newestOnTop={true}
         closeOnClick
         rtl={false}
         pauseOnFocusLoss
         draggable
         pauseOnHover
+        transition="slide" // Adiciona o efeito de slide
       />
     </div>
   );
