@@ -141,7 +141,7 @@ const CadastroCliente = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium  text-media mb-2">
+          <label className="block text-sm font-medium text-media mb-2">
             Nome da Igreja
           </label>
           <input
@@ -207,7 +207,7 @@ const CadastroCliente = () => {
 
         {/* Coluna 3 */}
         <div className="mb-4">
-          <label className="block text-sm font-medium  text-media mb-2">
+          <label className="block text-sm font-medium text-media mb-2">
             Senha Temporária
           </label>
           <div className="flex items-center">
@@ -221,7 +221,7 @@ const CadastroCliente = () => {
             <button
               type="button"
               onClick={gerarChaveAcesso}
-              className="ml-2 bg-media  text-white p-2 rounded"
+              className="ml-2 bg-media text-white p-2 rounded"
             >
               Gerar
             </button>
@@ -243,7 +243,7 @@ const CadastroCliente = () => {
         </div>
 
         <div className="mb-4">
-          <label className="block text-sm font-medium  text-media mb-2">
+          <label className="block text-sm font-medium text-media mb-2">
             Código de Verificação
           </label>
           <div className="flex items-center">

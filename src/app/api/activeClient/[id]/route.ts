@@ -10,6 +10,7 @@ export async function PUT(
   try {
     const { status } = await req.json();
 
+    // Verifica se o ID é válido e se o status é um valor aceitável
     if (!id || !status || !["ativo", "inativo"].includes(status)) {
       return NextResponse.json(
         { message: "Dados inválidos ou incompletos!" },
@@ -25,6 +26,7 @@ export async function PUT(
 
     conn.release();
 
+    // Verifica se o cliente foi encontrado e o status atualizado
     if (result.affectedRows === 0) {
       return NextResponse.json(
         { message: "Cliente não encontrado!" },
