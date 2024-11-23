@@ -124,6 +124,7 @@ export async function POST(req: NextRequest) {
         id INT AUTO_INCREMENT PRIMARY KEY,
         observacao VARCHAR(255) NOT NULL,
         valor DECIMAL(10,2) NOT NULL,
+        valor_pago DECIMAL(10,2) NOT NULL,
         status ENUM('Pago','Pendente','Pago Parcial','Vencida'),
         data_vencimento DATE
       )`;
