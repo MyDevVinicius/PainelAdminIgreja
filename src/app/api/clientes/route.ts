@@ -76,58 +76,59 @@ export async function POST(req: NextRequest) {
     // Criar banco de dados para o cliente com o nome gerado
     const createDbQuery = `CREATE DATABASE IF NOT EXISTS ${nome_banco}`;
     await conn.query(createDbQuery);
-
     // Criar tabela de usuários no banco específico do cliente
     const createTableQuery = `CREATE TABLE IF NOT EXISTS ${nome_banco}.usuarios (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(255) NOT NULL,
-        email VARCHAR(255) NOT NULL,
-        senha VARCHAR(255) NOT NULL,
-        cargo ENUM('cooperador', 'pastor', 'tesoureiro', 'diacono', 'conselho_fiscal') NOT NULL,
-        criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )`;
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(255) NOT NULL,
+  email VARCHAR(255) NOT NULL,
+  senha VARCHAR(255) NOT NULL,
+  cargo ENUM('cooperador', 'pastor', 'tesoureiro', 'diacono', 'conselho_fiscal') NOT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`;
     await conn.query(createTableQuery);
+
+    const createMembersTableQuery = `CREATE TABLE IF NOT EXISTS ${nome_banco}.membros (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(255) NOT NULL,
+  data_nascimento DATE,
+  endereco VARCHAR(255),
+  status ENUM('ativo', 'inativo') NOT NULL,
+  usuario_id INT,
+  CONSTRAINT fk_usuario_id FOREIGN KEY (usuario_id) REFERENCES ${nome_banco}.usuarios(id) ON DELETE SET NULL ON UPDATE CASCADE
+)`;
+    await conn.query(createMembersTableQuery);
 
     // Criar outras tabelas necessárias
     const createEntryTableQuery = `CREATE TABLE IF NOT EXISTS ${nome_banco}.entrada (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        observacao VARCHAR(255),
-        tipo ENUM('Dizimo','Oferta','Doacao','Campanha') NOT NULL,
-        forma_pagamento ENUM('Dinheiro','PIX','Debito','Credito'),
-        valor DECIMAL(10, 2) NOT NULL,
-        data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )`;
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  observacao VARCHAR(255),
+  tipo ENUM('Dizimo', 'Oferta', 'Doacao', 'Campanha') NOT NULL,
+  forma_pagamento ENUM('Dinheiro', 'PIX', 'Debito', 'Credito'),
+  valor DECIMAL(10, 2) NOT NULL,
+  data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  membro_id INT,
+  CONSTRAINT fk_membro_id FOREIGN KEY (membro_id) REFERENCES ${nome_banco}.membros(id) ON DELETE SET NULL ON UPDATE CASCADE
+)`;
     await conn.query(createEntryTableQuery);
 
     const createExitTableQuery = `CREATE TABLE IF NOT EXISTS ${nome_banco}.saida (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        observacao VARCHAR(255),
-        tipo ENUM('Pagamento','Salario','Ajuda de Custo') NOT NULL,
-        forma_pagamento ENUM('Dinheiro','PIX','Debito','Credito'),
-        valor DECIMAL(10, 2) NOT NULL,
-        data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )`;
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  observacao VARCHAR(255),
+  tipo ENUM('Pagamento', 'Salario', 'Ajuda de Custo') NOT NULL,
+  forma_pagamento ENUM('Dinheiro', 'PIX', 'Debito', 'Credito'),
+  valor DECIMAL(10, 2) NOT NULL,
+  data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)`;
     await conn.query(createExitTableQuery);
 
-    const createMembersTableQuery = `CREATE TABLE IF NOT EXISTS ${nome_banco}.membros (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        nome VARCHAR(255) NOT NULL,
-        data_nascimento DATE,
-        endereco VARCHAR(255),
-        status ENUM('ativo','inativo'),
-        usuario_id INT,
-        CONSTRAINT fk_usuario_id FOREIGN KEY (usuario_id) REFERENCES ${nome_banco}.usuarios(id) ON DELETE SET NULL ON UPDATE CASCADE
-      )`;
-    await conn.query(createMembersTableQuery);
-
     const createContasTableQuery = `CREATE TABLE IF NOT EXISTS ${nome_banco}.contas_a_pagar (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        observacao VARCHAR(255) NOT NULL,
-        valor DECIMAL(10,2) NOT NULL,
-        valor_pago DECIMAL(10,2) NOT NULL,
-        status ENUM('Pago','Pendente','Pago Parcial','Vencida'),
-        data_vencimento DATE
-      )`;
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  observacao VARCHAR(255) NOT NULL,
+  valor DECIMAL(10,2) NOT NULL,
+  valor_pago DECIMAL(10,2) NOT NULL,
+  status ENUM('Pago', 'Pendente', 'Pago Parcial', 'Vencida'),
+  data_vencimento DATE
+)`;
     await conn.query(createContasTableQuery);
 
     // Inserir o membro antes de inserir o usuário
